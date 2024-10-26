@@ -46,7 +46,7 @@ namespace UpWork.Controllers
             return NotFound(new { Message = "No Application with this id" });
         }
 
-        [Authorize(Roles = "Applicant")]
+        [Authorize(Roles = "Applicant,Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJobApplications(string id)
         {
@@ -62,7 +62,7 @@ namespace UpWork.Controllers
             return NotFound(new { Message = "Applications are empty" });
         }
 
-        [Authorize(Roles = "Applicant")]
+        [Authorize(Roles = "Applicant,Admin")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] JobApplicationDTO dto)
         {

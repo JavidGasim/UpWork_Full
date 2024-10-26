@@ -33,7 +33,7 @@ namespace UpWork.Controllers
         }
 
         [HttpPost("existUser")]
-        public async Task<IActionResult> ExistUser([FromQuery] string name)
+        public async Task<IActionResult> ExistUser([FromBody] string name)
         {
             var existingUser = await _userManager.FindByNameAsync(name);
             if (existingUser != null)
@@ -56,6 +56,7 @@ namespace UpWork.Controllers
                 Email = dto.Email,
                 //Password = dto.Password,
                 Country = dto.Country,
+                BirthDate = dto.BirthDate,
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);

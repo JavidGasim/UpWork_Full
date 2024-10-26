@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../RegisterPage/RegisterPage.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Input = ({ label, type, id, value, onChange, required, placeholder }) => (
   <div style={{ marginBottom: "20px" }}>
@@ -67,17 +67,14 @@ export default function RegisterPage() {
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [check, setCheck] = useState(true);
+  const navigate = useNavigate();
 
   const handleCheckboxChange = (role) => {
     setRole((prevRole) => (prevRole === role ? "" : role)); // Seçimi dəyiş
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setLoading(true); // Yükleniyor durumunu ayarla
-    setError(""); // Hata mesajını sıfırla
-
+  const fetchReg = async () => {
     try {
       const response = await fetch(
         "https://localhost:7086/api/account/register",
@@ -98,7 +95,11 @@ export default function RegisterPage() {
           }), // Form verilerini JSON formatında gönder
         }
       );
-    } catch (error) {}
+      console.log("Anna Mamiwenko");
+      navigate('/home')
+    } catch (error) {
+      console.log("Error: " + error);
+    }
     console.log("Signup attempted with:", {
       firstName,
       lastName,
@@ -108,7 +109,43 @@ export default function RegisterPage() {
       birthday,
       role,
     });
-    // Implement actual signup logic here
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setLoading(true); // Yüklənir statusunu ayarla
+    setError(""); // Hata mesajını sıfırla
+
+    const fetchUserName = async (username) => {
+      try {
+        const response = await fetch(
+          "https://localhost:7086/api/account/existUser",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(username), // yalnız username göndər
+          }
+        );
+
+        if (response.ok) {
+          console.log("Good");
+          setCheck(true);
+          fetchReg();
+        } else {
+          setCheck(false);
+          throw new Error("Username is not valid");
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserName(username);
   };
 
   return (
@@ -166,15 +203,38 @@ export default function RegisterPage() {
               required
               placeholder="Last name"
             />
-            <Input
-              label="User name"
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="User name"
-            />
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontWeight: "bold",
+                  color: "#001e00",
+                }}
+              >
+                User name
+              </label>
+              <input
+                label="User name"
+                type="text"
+                id="username"
+                style={{
+                  width: "95%",
+                  padding: "12px",
+                  fontSize: "16px",
+                  // border: "1px solid #e0e0e0",
+                  border: check ? "1px solid #e0e0e0" : "1px solid red",
+                  borderRadius: "8px",
+                  outline: "none",
+                  backgroundColor: "white",
+                  color: "black",
+                }}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="User name"
+              />
+            </div>
           </div>
           <Input
             label="Email"

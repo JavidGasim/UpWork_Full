@@ -81,10 +81,12 @@ const styles = {
   searchInput: {
     flexGrow: 1,
     color: "black",
-    backgroundColor: "white",
     padding: "0.5rem",
     border: "1px solid #ccc",
-    borderRadius: "4px 0 0 4px",
+    borderRadius: "4px",
+    margin: "0px 10px",
+    backgroundColor: "#14a800",
+    color: "white",
   },
   searchButton: {
     padding: "0.5rem 1rem",
@@ -261,37 +263,8 @@ export default function SignedHomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch("https://localhost:7086/api/job", {
-          method: "GET", // HTTP metodunu belirt
-          headers: {
-            "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
-            "Authorization": "Bearer " + localStorage.getItem("token"),
-          },
-        });
-
-        console.log("aaaaaaaa");
-
-        // API endpoint
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setJobs(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobs();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  // if (loading) return <div>Loading...</div>;
+  // if (error) return <div>Error: {error}</div>;
 
   const handleShowMore = () => {
     setVisibleCount((prevCount) => Math.min(prevCount + 10, allSkills.length));
@@ -333,6 +306,34 @@ export default function SignedHomePage() {
   }
 
   if (userRole == "Applicant") {
+    useEffect(() => {
+      const fetchJobs = async () => {
+        try {
+          const response = await fetch("https://localhost:7086/api/job", {
+            method: "GET", // HTTP metodunu belirt
+            headers: {
+              "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+
+          console.log("aaaaaaaa");
+
+          // API endpoint
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          setJobs(data);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchJobs();
+    }, []);
     return (
       <div style={styles.jobSearchPage}>
         <header style={styles.header}>
@@ -440,9 +441,132 @@ export default function SignedHomePage() {
       </div>
     );
   } else {
+    useEffect(() => {
+      const fetchApplicants = async () => {
+        try {
+          const response = await fetch("https://localhost:7086/api/job", {
+            method: "GET", // HTTP metodunu belirt
+            headers: {
+              "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+
+          console.log("aaaaaaaa");
+
+          // API endpoint
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          setJobs(data);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchApplicants();
+    }, []);
     return (
-      <div>
-        <h1>You are not authorized to access this page.</h1>
+      <div style={styles.jobSearchPage}>
+        <header style={styles.header}>
+          <div style={styles.logo}>Upwork</div>
+          <div style={styles.searchBar}>
+            <button style={styles.searchInput}>My Jobs</button>
+            <button style={styles.searchInput}>Add Job</button>
+            <div style={styles.userActions}>
+              <button style={styles.iconButton}>👤</button>
+            </div>
+          </div>
+        </header>
+
+        <div style={styles.mainContent}>
+          <aside style={styles.sidebar}>
+            <div style={styles.filterSection}>
+              <h3 style={styles.filterTitle}>Experience Level</h3>
+              <ul style={styles.filterList}>
+                <li style={styles.filterItem}>
+                  <label>
+                    <input type="checkbox" /> Entry Level
+                  </label>
+                </li>
+                <li style={styles.filterItem}>
+                  <label>
+                    <input type="checkbox" /> Intermediate
+                  </label>
+                </li>
+                <li style={styles.filterItem}>
+                  <label>
+                    <input type="checkbox" /> Expert
+                  </label>
+                </li>
+              </ul>
+            </div>
+            <div style={styles.filterSection}>
+              <h3 style={styles.filterTitle}>Tags</h3>
+              <div style={styles.selectedTags}>
+                {/* <h4 style={styles.selectedTitle}>Selected Tags:</h4> */}
+                {selectedTags.length > 0 ? (
+                  <p>{selectedTags.join(" ")}</p>
+                ) : (
+                  <p></p>
+                )}
+              </div>
+              <ul style={styles.filterList}>
+                {allSkills.slice(0, visibleCount).map((skill, index) => (
+                  <li key={index} style={styles.filterItem}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedTags.includes(skill)}
+                        onChange={() => handleTagChange(skill)}
+                      />{" "}
+                      {skill}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              {visibleCount < allSkills.length && (
+                <button style={styles.showMoreButton} onClick={handleShowMore}>
+                  Show More ⬇
+                </button>
+              )}
+              {visibleCount === allSkills.length && (
+                <button style={styles.showLessButton} onClick={handleShowLess}>
+                  Show Less ⬆
+                </button>
+              )}
+            </div>
+            <button type="submit" style={{ backgroundColor: "#14a800" }}>
+              Search
+            </button>
+          </aside>
+
+          <main style={styles.jobListings}>
+            <h2>Jobs you might like</h2>
+
+            {jobs.map((job) => (
+              <div key={job.id} style={styles.jobCard}>
+                <h3>{job.content}</h3>
+                <p style={styles.jobDescription}>{job.description}</p>
+                <div style={styles.jobDetails}>
+                  <span style={styles.budget}>{job.price}</span>
+                  <span style={styles.proposals}>{job.tags} proposals</span>
+                </div>
+                <div style={styles.skills}>
+                  {job.skills.map((skill) => (
+                    <span key={skill} style={styles.skillTag}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+                <button style={styles.applyButton}>Apply Now</button>
+              </div>
+            ))}
+          </main>
+        </div>
       </div>
     );
   }

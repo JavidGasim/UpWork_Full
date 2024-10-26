@@ -22,7 +22,7 @@ namespace UpWork.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin,Applicant")]
+        [Authorize(Roles = "Admin,Applicant,Advertiser")]
         [HttpGet]
         public async Task<List<JobDTO>> Get()
         {
@@ -31,7 +31,7 @@ namespace UpWork.Controllers
             return jobDTO;
         }
 
-        [Authorize(Roles = "Applicant")]
+        [Authorize(Roles = "Applicant,Advertiser")]
         [HttpGet("{tags}")]
         public async Task<List<JobDTO>> Get(List<string> tags)
         {
