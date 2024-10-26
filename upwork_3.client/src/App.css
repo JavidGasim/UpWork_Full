@@ -1,0 +1,14 @@
+﻿#root {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  background-color: white;
+}
+
+th,
+td {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}

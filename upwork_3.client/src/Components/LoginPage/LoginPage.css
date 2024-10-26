@@ -1,0 +1,28 @@
+input[type="checkbox"] {
+  /* -webkit-appearance: none; /* Brauzerin default görünüşünü aradan qaldırır */
+  width: 20px; /* Checkbox-un eni */
+  height: 20px; /* Checkbox-un hündürlüyü */
+  background-color: white; /* İçini ağ etmək */
+  border: 2px solid black; /* Qara çərçivə */
+  border-radius: 3px; /* Dairəvi künclər */
+  cursor: pointer; /* Siçan göstəricisini dəyişmək */
+  position: relative; /* Aşağıdakı işarəni düzəltmək üçün */
+}
+
+input[type="checkbox"]:checked {
+  background-color: white; /* Seçildikdə ağ saxlanılması */
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✔"; /* İşarəni daxil et */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black; /* İşarənin rəngi */
+  font-size: 16px; /* İşarənin ölçüsü */
+  position: absolute; /* Aşağıda düzəlmək üçün */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}

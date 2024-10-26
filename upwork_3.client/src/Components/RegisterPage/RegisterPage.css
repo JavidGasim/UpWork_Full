@@ -1,0 +1,50 @@
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-color: black; /* Kalendar işarəsinin arxa planını qara etmək */
+  /* border-radius: 50%; Dairəvi forma vermək üçün */
+  padding: 2px; /* Daxili boşluğu artırmaq */
+}
+
+input[type="date"] {
+  width: 100%; /* İstəyə görə ölçü verin */
+  height: 40px; /* Sabit hündürlük */
+  background-color: white; /* Ağ arxa plan */
+  color: black; /* Qara yazı */
+  border: 1px solid #ccc; /* Çərçivə */
+  border-radius: 4px; /* Dairəvi künclər */
+  padding: 5px; /* Daxili boşluq */
+  box-sizing: border-box; /* Çərçivə və paddingi daxil edin */
+}
+
+p {
+  margin-top: 10px; /* Yuxarı margin */
+  margin-bottom: 0; /* Aşağı margin sıfırlanır */
+}
+
+input[type="checkbox"] {
+ /* -webkit-appearance: none; /* Brauzerin default görünüşünü aradan qaldırır */
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: white; /* Seçildikdə ağ saxlanılması */
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✔"; /* İşarəni daxil et */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black; /* İşarənin rəngi */
+  font-size: 16px; /* İşarənin ölçüsü */
+  position: absolute; /* Aşağıda düzəlmək üçün */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}

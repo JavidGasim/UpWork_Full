@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpWork_3.Server", "UpWork_3.Server\UpWork_3.Server.csproj", "{28CDF7BB-BE96-4322-BB67-03EE3895162C}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "upwork_3.client", "upwork_3.client\upwork_3.client.esproj", "{E431E469-22B3-4E23-A695-77E5AF32969A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28CDF7BB-BE96-4322-BB67-03EE3895162C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28CDF7BB-BE96-4322-BB67-03EE3895162C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28CDF7BB-BE96-4322-BB67-03EE3895162C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28CDF7BB-BE96-4322-BB67-03EE3895162C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E431E469-22B3-4E23-A695-77E5AF32969A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2936E4A2-DF10-40B4-BD63-4E606258C6B0}
+	EndGlobalSection
+EndGlobal
