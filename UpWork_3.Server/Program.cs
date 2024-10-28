@@ -9,6 +9,8 @@ using UpWork.Repositories.Abstracts;
 using UpWork.Repositories.Concretes;
 using UpWork.Services.Abstracts;
 using UpWork.Services.Concretes;
+using UpWork_3.Server.Services.Abstracts;
+using UpWork_3.Server.Services.Concretes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,7 @@ builder.Services.AddScoped<IAdvertiserService, AdvertiserService>();
 builder.Services.AddScoped<IApplicantService, ApplicantService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 var conn = builder.Configuration.GetConnectionString("Default");
 

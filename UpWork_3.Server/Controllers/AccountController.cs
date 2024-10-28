@@ -54,6 +54,7 @@ namespace UpWork.Controllers
                 Firstname = dto.Firstname,
                 Lastname = dto.Lastname,
                 Email = dto.Email,
+                ImagePath = dto.ImagePath,
                 //Password = dto.Password,
                 Country = dto.Country,
                 BirthDate = dto.BirthDate,

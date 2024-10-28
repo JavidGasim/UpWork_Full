@@ -63,6 +63,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
+  const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
   const [birthday, setBirthday] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
@@ -70,36 +72,67 @@ export default function RegisterPage() {
   const [check, setCheck] = useState(true);
   const navigate = useNavigate();
 
+  const handleFileChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   const handleCheckboxChange = (role) => {
     setRole((prevRole) => (prevRole === role ? "" : role)); // Seçimi dəyiş
   };
 
+  const postRequest = async (url, body) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error("Request failed with status " + response.status);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const fetchReg = async () => {
     try {
+      console.log("Anna Mamiwenko");
+      // const birth = new Date(birthday);
+      // await postRequest("https://localhost:7086/api/account/register", body);
       const response = await fetch(
         "https://localhost:7086/api/account/register",
         {
-          method: "POST", // HTTP metodunu belirt
+          method: "POST",
           headers: {
-            "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
+          body: JSON.stringify(
+            username,
             firstName,
             lastName,
-            username,
             email,
             password,
             country,
-            birthday,
+            imageUrl,
             role,
-          }), // Form verilerini JSON formatında gönder
+            birthday
+          ),
         }
       );
-      console.log("Anna Mamiwenko");
-      navigate('/home')
+
+      if (response.ok) {
+        navigate("/login");
+      }
     } catch (error) {
       console.log("Error: " + error);
     }
+
     console.log("Signup attempted with:", {
       firstName,
       lastName,
@@ -107,46 +140,82 @@ export default function RegisterPage() {
       password,
       country,
       birthday,
+      imageUrl,
       role,
     });
   };
 
+  const fetchUserName = async () => {
+    try {
+      const body = { username }; // yalnız username göndər
+      console.log("Sending body:", body);
+      // const response = await postRequest(
+      //   "https://localhost:7086/api/account/existUser",
+      //   body
+      // );
+
+      const response = await fetch(
+        "https://localhost:7086/api/account/existUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(username),
+        }
+      );
+
+      if (response) {
+        console.log("Good");
+        setCheck(true);
+      } else {
+        console.log("o la la la");
+      }
+    } catch (error) {
+      setCheck(false);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchImg = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("File", image);
+
+      const response = await fetch("https://localhost:7086/api/Image/post", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      console.log(data.imageUrl);
+      setImageUrl(data.imageUrl.toString());
+      await fetchUserName();
+      // await fetchReg();
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true); // Yüklənir statusunu ayarla
     setError(""); // Hata mesajını sıfırla
 
-    const fetchUserName = async (username) => {
-      try {
-        const response = await fetch(
-          "https://localhost:7086/api/account/existUser",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(username), // yalnız username göndər
-          }
-        );
-
-        if (response.ok) {
-          console.log("Good");
-          setCheck(true);
-          fetchReg();
-        } else {
-          setCheck(false);
-          throw new Error("Username is not valid");
-        }
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserName(username);
+    await fetchImg();
   };
+
+  useEffect(() => {
+    if (imageUrl) {
+      fetchReg();
+    }
+  }, [imageUrl]);
 
   return (
     <div
@@ -287,6 +356,37 @@ export default function RegisterPage() {
             {birthday && (
               <p>Your birthday is: {new Date(birthday).toLocaleDateString()}</p>
             )}
+          </div>
+
+          <div style={{ marginTop: "20px" }}>
+            <label
+              htmlFor="image"
+              style={{
+                display: "block",
+                marginBottom: "5px",
+                fontWeight: "bold",
+                color: "#001e00",
+              }}
+            >
+              Image
+            </label>
+            <input
+              style={{
+                width: "95%",
+                padding: "12px",
+                fontSize: "16px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                outline: "none",
+                backgroundColor: "white",
+                color: "black",
+              }}
+              // label="Image"
+              type="file"
+              id="image"
+              name="image"
+              onChange={handleFileChange}
+            />
           </div>
 
           <div style={{ marginBottom: "20px", marginTop: "20px" }}>

@@ -12,6 +12,8 @@ namespace UpWork.Entities
         [Required]
         public string? Country { get; set; }
         [Required]
+        public string? ImagePath { get; set; }
+        [Required]
         public DateTime BirthDate { get; set; }
 
     }
