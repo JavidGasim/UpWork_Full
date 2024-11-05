@@ -76,35 +76,28 @@ export default function RegisterPage() {
     setImage(e.target.files[0]);
   };
 
-  const handleCheckboxChange = (role) => {
-    setRole((prevRole) => (prevRole === role ? "" : role)); // Seçimi dəyiş
-  };
-
-  const postRequest = async (url, body) => {
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        throw new Error("Request failed with status " + response.status);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+  const handleCheckboxChange = (selectedRole) => {
+    setRole((prevRole) => (prevRole === selectedRole ? "" : selectedRole));
   };
 
   const fetchReg = async () => {
+    const formattedBirthday = birthday
+      ? new Date(birthday).toISOString().split("T")[0]
+      : "";
+    const imagePath = imageUrl;
     try {
-      console.log("Anna Mamiwenko");
-      // const birth = new Date(birthday);
-      // await postRequest("https://localhost:7086/api/account/register", body);
+      const body = {
+        username,
+        firstName,
+        lastName,
+        email,
+        password,
+        country,
+        imagePath,
+        role,
+        birthDate: formattedBirthday,
+      };
+
       const response = await fetch(
         "https://localhost:7086/api/account/register",
         {
@@ -112,48 +105,24 @@ export default function RegisterPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(
-            username,
-            firstName,
-            lastName,
-            email,
-            password,
-            country,
-            imageUrl,
-            role,
-            birthday
-          ),
+          body: JSON.stringify(body),
         }
       );
 
-      if (response.ok) {
-        navigate("/login");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Qeydiyyat baş tutmadı: " + errorText);
       }
-    } catch (error) {
-      console.log("Error: " + error);
-    }
 
-    console.log("Signup attempted with:", {
-      firstName,
-      lastName,
-      email,
-      password,
-      country,
-      birthday,
-      imageUrl,
-      role,
-    });
+      navigate("/login");
+    } catch (error) {
+      alert("Xəta: " + error.message);
+    }
   };
 
   const fetchUserName = async () => {
     try {
-      const body = { username }; // yalnız username göndər
-      console.log("Sending body:", body);
-      // const response = await postRequest(
-      //   "https://localhost:7086/api/account/existUser",
-      //   body
-      // );
-
+      const body = { username }; // Obyekt formatında göndər
       const response = await fetch(
         "https://localhost:7086/api/account/existUser",
         {
@@ -161,14 +130,15 @@ export default function RegisterPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(username),
+          body: JSON.stringify(body), // Burada düzəliş et
         }
       );
 
-      if (response) {
+      if (response.ok) {
         console.log("Good");
         setCheck(true);
       } else {
+        setCheck(false);
         console.log("o la la la");
       }
     } catch (error) {
@@ -385,7 +355,7 @@ export default function RegisterPage() {
               type="file"
               id="image"
               name="image"
-              onChange={handleFileChange}
+              onChange={(e) => handleFileChange(e)}
             />
           </div>
 

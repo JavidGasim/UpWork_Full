@@ -33,9 +33,9 @@ namespace UpWork.Controllers
         }
 
         [HttpPost("existUser")]
-        public async Task<IActionResult> ExistUser([FromBody] string name)
+        public async Task<IActionResult> ExistUser([FromBody] string username)
         {
-            var existingUser = await _userManager.FindByNameAsync(name);
+            var existingUser = await _userManager.FindByNameAsync(username);
             if (existingUser != null)
             {
                 return BadRequest(new { Status = "Name Error", Message = "A user with this username already exists!" });
@@ -86,6 +86,8 @@ namespace UpWork.Controllers
             {
                 var user = await _userManager.FindByNameAsync(dto.Username);
                 var userRoles = await _userManager.GetRolesAsync(user);
+                var pp = user.ImagePath;
+                Console.WriteLine(user.ImagePath);
 
                 var authClaims = new List<Claim>
                 {
@@ -100,7 +102,7 @@ namespace UpWork.Controllers
 
                 var token = GetToken(authClaims);
 
-                return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token), Expiration = token.ValidTo });
+                return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token), Expiration = token.ValidTo, ImagePath = pp});
             }
 
             return Unauthorized();

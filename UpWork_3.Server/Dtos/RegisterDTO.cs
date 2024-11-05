@@ -16,6 +16,7 @@ namespace UpWork.Dtos
         public string? Password { get; set; }
         [Required]
         public string? Country { get; set; }
+
         public string? ImagePath { get; set; }
         [Required]
         public string? Role { get; set; }

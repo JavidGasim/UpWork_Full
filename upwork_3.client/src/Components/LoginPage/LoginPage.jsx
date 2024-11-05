@@ -72,12 +72,15 @@ export default function LoginPage() {
     setError(""); // Hata mesajını sıfırla
 
     try {
+      console.log(username, password);
+
+      const body = { username, password };
       const response = await fetch("https://localhost:7086/api/account/login", {
         method: "POST", // HTTP metodunu belirt
         headers: {
           "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
         },
-        body: JSON.stringify({ username, password }), // Form verilerini JSON formatında gönder
+        body: JSON.stringify(body), // Form verilerini JSON formatında gönder
       });
 
       if (!response.ok) {
@@ -85,6 +88,7 @@ export default function LoginPage() {
       } else {
         const data = await response.json(); // Cevabı JSON formatında al
         localStorage.setItem("token", data.token); // Token'ı localStorage'a kaydet
+        localStorage.setItem("imagePath", data.imagePath); //
         navigate("/home");
         console.log("Giriş başarılı:", data);
         // console.log("Giriş başarılı:", response);
