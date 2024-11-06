@@ -48,17 +48,38 @@ namespace UpWork.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
         {
-            var user = new CustomIdentityUser
+            var user = new CustomIdentityUser { };
+
+            if (dto.Role == "Applicant")
             {
-                UserName = dto.Username,
-                Firstname = dto.Firstname,
-                Lastname = dto.Lastname,
-                Email = dto.Email,
-                ImagePath = dto.ImagePath,
-                //Password = dto.Password,
-                Country = dto.Country,
-                BirthDate = dto.BirthDate,
-            };
+                user = new Applicant
+                {
+                    UserName = dto.Username,
+                    Firstname = dto.Firstname,
+                    Lastname = dto.Lastname,
+                    Email = dto.Email,
+                    ImagePath = dto.ImagePath,
+                    Connections = 10,
+                    //Password = dto.Password,
+                    Country = dto.Country,
+                    BirthDate = dto.BirthDate,
+                };
+            }
+
+            else
+            {
+                user = new Advertiser
+                {
+                    UserName = dto.Username,
+                    Firstname = dto.Firstname,
+                    Lastname = dto.Lastname,
+                    Email = dto.Email,
+                    ImagePath = dto.ImagePath,
+                    //Password = dto.Password,
+                    Country = dto.Country,
+                    BirthDate = dto.BirthDate,
+                };
+            }
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
@@ -92,6 +113,8 @@ namespace UpWork.Controllers
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // İstifadəçi ID-si
+
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
@@ -102,7 +125,7 @@ namespace UpWork.Controllers
 
                 var token = GetToken(authClaims);
 
-                return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token), Expiration = token.ValidTo, ImagePath = pp});
+                return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token), Expiration = token.ValidTo, ImagePath = pp });
             }
 
             return Unauthorized();

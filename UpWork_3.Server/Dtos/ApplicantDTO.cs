@@ -20,5 +20,6 @@ namespace UpWork.Dtos
         public DateTime BirthDate { get; set; }
         [Required]
         public List<string>? Skills { get; set; }
+        public int Connections { get; set; }
     }
 }

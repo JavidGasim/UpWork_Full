@@ -7,5 +7,6 @@ namespace UpWork.Entities
     {
         public int Connections { get; set; } = 10;
         public List<string>? Skills { get; set; }
+        public string? About { get; set; }
     }
 }

@@ -7,7 +7,7 @@ using UpWork.Services.Abstracts;
 
 namespace UpWork.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AdvertiserController : ControllerBase

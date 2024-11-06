@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 const styles = {
   jobSearchPage: {
@@ -262,8 +263,14 @@ export default function SignedHomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+
   // if (loading) return <div>Loading...</div>;
   // if (error) return <div>Error: {error}</div>;
+
+  const imageClickHandler = () => {
+    navigate("/profile");
+  };
 
   const handleShowMore = () => {
     setVisibleCount((prevCount) => Math.min(prevCount + 10, allSkills.length));
@@ -352,6 +359,7 @@ export default function SignedHomePage() {
             <div style={styles.userActions}>
               {/* <button style={styles.iconButton}>👤</button> */}
               <img
+                onClick={imageClickHandler}
                 src={imagePath || defaultProfileImageUrl}
                 alt="profile_image"
                 style={{
@@ -491,6 +499,7 @@ export default function SignedHomePage() {
             <button style={styles.searchInput}>Add Job</button>
             <div style={styles.userActions}>
               <img
+                onClick={imageClickHandler}
                 src={imagePath || defaultProfileImageUrl}
                 alt="profile_image"
                 style={{
