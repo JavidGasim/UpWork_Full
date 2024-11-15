@@ -174,7 +174,10 @@ export default function HomePage() {
               <Button>Log In</Button>
             </Link>
             <Link to="/register">
-              <Button primary style={{ marginLeft: "15px" }}>
+              <Button
+                primary
+                style={{ marginLeft: "15px", backgroundColor: "#14a800" }}
+              >
                 Sign Up
               </Button>
             </Link>

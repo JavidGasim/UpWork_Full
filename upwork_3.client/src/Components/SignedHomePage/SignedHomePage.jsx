@@ -81,7 +81,8 @@ const styles = {
   },
   searchInput: {
     flexGrow: 1,
-    padding: "0.5rem",
+    padding: "0.73rem 1rem",
+
     border: "1px solid #ccc",
     borderRadius: "4px",
     margin: "0px 10px",
@@ -89,11 +90,11 @@ const styles = {
     color: "white",
   },
   searchButton: {
-    padding: "0.5rem 1rem",
+    padding: "0.73rem 1rem",
     backgroundColor: "#14a800",
     color: "white",
     border: "none",
-    borderRadius: "0 4px 4px 0",
+    borderRadius: "4px",
     cursor: "pointer",
   },
   jobCard: {
@@ -265,6 +266,15 @@ export default function SignedHomePage() {
 
   const navigate = useNavigate();
 
+  const handleLogout = () => {
+    // Sessiyanı təmizləmək
+    localStorage.removeItem("token"); // Tokeni silmək
+    localStorage.removeItem("imagePath"); // İstifadəçi məlumatlarını silmək
+
+    // Giriş səhifəsinə yönləndirmək
+    navigate("/login");
+  };
+
   // if (loading) return <div>Loading...</div>;
   // if (error) return <div>Error: {error}</div>;
 
@@ -358,16 +368,54 @@ export default function SignedHomePage() {
             <button style={styles.searchButton}>Search</button>
             <div style={styles.userActions}>
               {/* <button style={styles.iconButton}>👤</button> */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "-5px 5px",
+                  fontSize: "16px",
+                  color: "#ffffff",
+                  backgroundColor: "#14a800",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s",
+                  marginLeft: "10px",
+                }}
+                // onMouseOver={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#d32f2f")
+                // }
+                // onMouseOut={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#f44336")
+                // }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    marginRight: "3px",
+                  }}
+                >
+                  <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
+                  <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
+                </svg>
+                Logout
+              </button>
               <img
                 onClick={imageClickHandler}
                 src={imagePath || defaultProfileImageUrl}
                 alt="profile_image"
                 style={{
                   width: "40px",
-                  height: "35px",
+                  height: "40px",
+                  objectFit: "cover",
                   marginLeft: "10px",
                   border: "1px solid transparent",
-                  borderRadius: "5px",
+                  borderRadius: "50%",
                 }}
               />
             </div>
@@ -504,10 +552,11 @@ export default function SignedHomePage() {
                 alt="profile_image"
                 style={{
                   width: "40px",
-                  height: "35px",
+                  height: "40px",
+                  objectFit: "cover",
                   marginLeft: "10px",
                   border: "1px solid transparent",
-                  borderRadius: "5px",
+                  borderRadius: "50%",
                 }}
               />
             </div>
