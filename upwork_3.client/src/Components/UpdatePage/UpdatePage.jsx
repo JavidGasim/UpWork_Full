@@ -400,29 +400,28 @@ export default function UpdatePage() {
       );
 
       if (response.ok) {
-        console.log("Good");
-        setCheck(true);
-        await fetchUpdate();
+        console.log("User exists");
+        setCheck(true); // Username var, check true olmalıdır
+        await fetchUpdate(); // Yenilənməsi lazım olan məlumatları göndər
       } else {
-        setCheck(false);
-        console.log("o la la la");
+        setCheck(false); // Username yoxdur, check false olmalıdır
+        console.log("User does not exist");
       }
     } catch (error) {
-      setCheck(false);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+      setCheck(false); // Xəta baş verdikdə check false qoyulur
+      setError(`Error checking username: ${error.message}`); // Xətanın mesajını göstər
+      console.error(error);
     }
   };
 
   const fetchImg = async () => {
     try {
-      const formData = new FormData();
-      formData.append("File", image);
+      const formData1 = new FormData();
+      formData1.append("File", image); // Şəkil əlavə edilir
 
       const response = await fetch("https://localhost:7086/api/Image/post", {
         method: "POST",
-        body: formData,
+        body: formData1,
       });
 
       if (!response.ok) {
@@ -430,39 +429,50 @@ export default function UpdatePage() {
       }
 
       const data = await response.json();
-      console.log(data.imageUrl);
-      setImageUrl(data.imageUrl.toString());
+      console.log(data.imageUrl); // Yüklənmiş şəkilin URL-ni göstər
 
-      if (formData.userName != null && formData.userName != "") {
+      // `imagePath`'ı `formData` daxilində yeniləyirik
+      setImageUrl(data.imageUrl.toString()); // URL-ni saxla
+      formData.imagePath = data.imageUrl.toString(); // imagePath təyin edirik
+
+      // `formData.userName` mövcud olduqda istifadəçi adı yoxlanır
+      if (formData.userName && formData.userName.trim() !== "") {
         await fetchUserName();
       }
 
-      await fetchUpdate();
-      // await fetchReg();
+      await fetchUpdate(); // Verilənləri yenilə
     } catch (error) {
-      setError(error.message);
+      setError(`Error uploading image: ${error.message}`); // Şəkil yüklənərkən xəta mesajını göstər
+      console.error(error);
+    } finally {
+      setLoading(false); // Yükləmə tamamlandıqda loading vəziyyəti sıfırlanır
     }
   };
 
   const fetchUpdate = async () => {
     try {
       const bday = formData.birthDate
-        ? new Date(formData.birthDate).toISOString().split("T")[0]
+        ? new Date(formData.birthDate).toISOString().split("T")[0] // Doğum tarixini düzgün formatda al
         : "";
 
-      const imgPth = formData.imagePath;
+      const imgPth = formData.imagePath; // Şəkilin yolunu al
+
+      if (!imgPth) {
+        throw new Error("Image path is missing"); // Şəkil yolu mövcud deyilsə, xəta ver
+      }
+
+      console.log("Updating user...");
       console.log(imgPth);
       console.log(bday);
-      console.log("ooiukyjthrgewf");
-      console.log(userId);
 
+      // Yenilənən məlumatları göndəririk
       const response = await fetch(
-        "https://localhost:7086/api/applicant/" + userId,
+        `https://localhost:7086/api/applicant/${userId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Token əlavə edilir
           },
           body: JSON.stringify({
             userName: formData.userName,
@@ -470,21 +480,23 @@ export default function UpdatePage() {
             emailAddress: formData.emailAddress,
             skills: formData.skills,
             country: formData.country,
-            imagePath: imgPth,
+            imagePath: imgPth, // Yenilənən şəkil yolu
             about: formData.about,
             birthDate: bday,
           }),
         }
       );
-      console.log("girdun cixdun");
 
       if (response.ok) {
-        console.log("updated successfully");
+        console.log("User updated successfully");
+      } else {
+        console.log("Failed to update user");
       }
     } catch (error) {
-      console.log("giremmedun cixammadun");
-
-      setError(error);
+      setError(`Error updating user: ${error.message}`); // Yeniləmə zamanı baş verən xətaları göstər
+      console.error(error);
+    } finally {
+      setLoading(false); // Yükləmə tamamlandıqda loading vəziyyəti sıfırlanır
     }
   };
 
