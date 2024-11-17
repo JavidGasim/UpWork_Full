@@ -309,6 +309,30 @@ export default function SignedHomePage() {
 
   let userRole = null;
 
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(
+        "https://localhost:7086/api/job/{searchTerm}",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setJobs(data);
+      console.log("Search Results:", data); // Axtarış nəticələrini burada idarə edin
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
+  };
+
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
@@ -479,7 +503,11 @@ export default function SignedHomePage() {
                 </button>
               )}
             </div>
-            <button type="submit" style={{ backgroundColor: "#14a800" }}>
+            <button
+              type="submit"
+              style={{ backgroundColor: "#14a800" }}
+              onClick={handleSearch}
+            >
               Search
             </button>
           </aside>

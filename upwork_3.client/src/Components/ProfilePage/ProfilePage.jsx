@@ -173,9 +173,14 @@ export default function ProfilePage() {
   const [country, setCountry] = useState();
   const [birthdate, setBirthdate] = useState("");
   const [skills, setSkills] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [connections, setConnections] = useState();
   const [about, setAbout] = useState("");
   const navigate = useNavigate();
+
+  const handleUpdate = () => {
+    navigate("/edit");
+  };
 
   const handleLogout = () => {
     // Sessiyanı təmizləmək
@@ -293,7 +298,22 @@ export default function ProfilePage() {
         })
         .catch((error) => console.log(error));
     }, []);
-    // fetchGetApplicant();
+
+    useEffect(() => {
+      fetch("https://localhost:7086/api/JobApplication/" + userId, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // data = response.json();
+          setApplications(data.Job || []);
+          console.log(data);
+        });
+    });
     return (
       <div style={{ height: "100vh" }}>
         <div style={styles.jobSearchPage}>
@@ -407,7 +427,7 @@ export default function ProfilePage() {
                   marginLeft: "1.5rem",
                 })
               }
-              onClick={handleEditAbout}
+              onClick={handleUpdate}
             >
               <svg
                 style={editIconStyle}
@@ -435,24 +455,26 @@ export default function ProfilePage() {
                 marginBottom: "1rem",
               }}
             >
-              {["about", "skills", "connections"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    fontWeight: "500",
-                    color: activeTab === tab ? "#2563eb" : "#4b5563",
-                    borderBottom:
-                      activeTab === tab ? "2px solid #2563eb" : "none",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
+              {["about", "skills", "connections", "my applications"].map(
+                (tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      fontWeight: "500",
+                      color: activeTab === tab ? "#2563eb" : "#4b5563",
+                      borderBottom:
+                        activeTab === tab ? "2px solid #2563eb" : "none",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                )
+              )}
             </div>
 
             <div
@@ -481,7 +503,7 @@ export default function ProfilePage() {
                     >
                       About Me
                     </h2>
-                    <h3
+                    {/* <h3
                       style={{
                         color: "black",
                         overflowWrap: "break-word",
@@ -492,9 +514,20 @@ export default function ProfilePage() {
                       }}
                     >
                       {about}
-                    </h3>
+                    </h3> */}
                   </div>
-                  <p style={{ color: "#374151" }}>{about}</p>
+                  <p
+                    style={{
+                      color: "black",
+                      overflowWrap: "break-word",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      marginLeft: "20px",
+                      marginRight: "20px",
+                    }}
+                  >
+                    {about}
+                  </p>
                 </div>
               )}
 
@@ -533,6 +566,47 @@ export default function ProfilePage() {
                         }}
                       >
                         {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "my applications" && (
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                        color: "#111827",
+                      }}
+                    >
+                      My Applications
+                    </h2>
+                  </div>
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
+                  >
+                    {applications.map((application) => (
+                      <span
+                        key={application}
+                        style={{
+                          padding: "0.25rem 0.75rem",
+                          backgroundColor: "#e5e7eb",
+                          color: "#1f2937",
+                          borderRadius: "9999px",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        {application.applicantId}
                       </span>
                     ))}
                   </div>

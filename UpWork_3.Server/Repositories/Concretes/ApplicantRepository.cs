@@ -56,10 +56,10 @@ namespace UpWork.Repositories.Concretes
 
         public async Task UpdateApplicant(Applicant applicant)
         {
-            await Task.Run(() =>
-            {
-                _context.Applicants.Update(applicant);
-            });
+            //await Task.Run(() =>
+            //{
+                _context.Users.Update(applicant);
+            //});
 
             await _context.SaveChangesAsync();
         }

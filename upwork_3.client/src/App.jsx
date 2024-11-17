@@ -6,6 +6,7 @@ import LoginPage from "./Components/LoginPage/LoginPage";
 import RegisterPage from "./Components/RegisterPage/RegisterPage";
 import SignedHomePage from "./Components/SignedHomePage/SignedHomePage";
 import ProfilePage from "./Components/ProfilePage/ProfilePage";
+import UpdatePage from "./Components/UpdatePage/UpdatePage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/home" element={<SignedHomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/edit" element={<UpdatePage />} />
         {/* <Route path="/contact" element={<Contact />} /> */}
       </Routes>
     </Router>

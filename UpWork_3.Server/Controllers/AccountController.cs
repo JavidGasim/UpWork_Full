@@ -33,7 +33,7 @@ namespace UpWork.Controllers
         }
 
         [HttpPost("existUser")]
-        public async Task<IActionResult> ExistUser([FromBody] string username)
+        public async Task<IActionResult> ExistUser(string username)
         {
             var existingUser = await _userManager.FindByNameAsync(username);
             if (existingUser != null)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UpWork.Data;
 
@@ -11,9 +12,11 @@ using UpWork.Data;
 namespace UpWork.Migrations
 {
     [DbContext(typeof(UpWorkDb))]
-    partial class UpWorkDbModelSnapshot : ModelSnapshot
+    [Migration("20241117041645_init9")]
+    partial class init9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

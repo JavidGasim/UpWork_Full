@@ -1,26 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UpWork.Dtos
+namespace UpWork_3.Server.Dtos
 {
-    public class ApplicantDTO
+    public class ApplicantUpdateDTO
     {
-        [Required]
-        public string? Firstname { get; set; }
-        [Required]
-        public string? Lastname { get; set; }
-        [Required]
+        public string? UserName { get; set; }
         [DataType(DataType.EmailAddress)]
         public string? EmailAddress { get; set; }
-        [Required]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
-        [Required]
         public string? Country { get; set; }
-        [Required]
-        public DateTime BirthDate { get; set; }
-        [Required]
+        public DateTime? BirthDate { get; set; }
         public List<string>? Skills { get; set; }
-        public int Connections { get; set; }
         public string? About { get; set; }
+        public string? ImagePath { get; set; }
+
     }
 }
