@@ -275,9 +275,6 @@ export default function SignedHomePage() {
     navigate("/login");
   };
 
-  // if (loading) return <div>Loading...</div>;
-  // if (error) return <div>Error: {error}</div>;
-
   const imageClickHandler = () => {
     navigate("/profile");
   };
@@ -574,6 +571,43 @@ export default function SignedHomePage() {
             <button style={styles.searchInput}>My Jobs</button>
             <button style={styles.searchInput}>Add Job</button>
             <div style={styles.userActions}>
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "-5px 5px",
+                  fontSize: "16px",
+                  color: "#ffffff",
+                  backgroundColor: "#14a800",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s",
+                  marginLeft: "10px",
+                }}
+                // onMouseOver={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#d32f2f")
+                // }
+                // onMouseOut={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#f44336")
+                // }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    marginRight: "3px",
+                  }}
+                >
+                  <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
+                  <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
+                </svg>
+                Logout
+              </button>
               <img
                 onClick={imageClickHandler}
                 src={imagePath || defaultProfileImageUrl}

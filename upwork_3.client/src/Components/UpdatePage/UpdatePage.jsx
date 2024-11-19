@@ -337,6 +337,13 @@ export default function UpdatePage() {
     imagePath: "",
   });
 
+  const [currentUserName, setCurrentUserName] = useState("");
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [currentUserCountry, setCurrentUserCountry] = useState("");
+  const [currentUserAbout, setCurrentUserAbout] = useState("");
+  const [currentUserSkills, setCurrentUserSkills] = useState([]);
+  const [currentUserBirth, setCurrentUserBirth] = useState("");
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -417,27 +424,31 @@ export default function UpdatePage() {
   const fetchImg = async () => {
     try {
       const formData1 = new FormData();
-      formData1.append("File", image); // Şəkil əlavə edilir
+      console.log(image);
 
-      const response = await fetch("https://localhost:7086/api/Image/post", {
-        method: "POST",
-        body: formData1,
-      });
+      if (image != null) {
+        formData1.append("File", image); // Şəkil əlavə edilir
 
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
+        const response = await fetch("https://localhost:7086/api/Image/post", {
+          method: "POST",
+          body: formData1,
+        });
 
-      const data = await response.json();
-      console.log(data.imageUrl); // Yüklənmiş şəkilin URL-ni göstər
+        if (!response.ok) {
+          throw new Error("Failed to upload image");
+        }
 
-      // `imagePath`'ı `formData` daxilində yeniləyirik
-      setImageUrl(data.imageUrl.toString()); // URL-ni saxla
-      formData.imagePath = data.imageUrl.toString(); // imagePath təyin edirik
+        const data = await response.json();
+        console.log(data.imageUrl); // Yüklənmiş şəkilin URL-ni göstər
 
-      // `formData.userName` mövcud olduqda istifadəçi adı yoxlanır
-      if (formData.userName && formData.userName.trim() !== "") {
-        await fetchUserName();
+        // `imagePath`'ı `formData` daxilində yeniləyirik
+        setImageUrl(data.imageUrl.toString()); // URL-ni saxla
+        formData.imagePath = data.imageUrl.toString(); // imagePath təyin edirik
+
+        // `formData.userName` mövcud olduqda istifadəçi adı yoxlanır
+        if (formData.userName && formData.userName.trim() !== "") {
+          await fetchUserName();
+        }
       }
 
       await fetchUpdate(); // Verilənləri yenilə
@@ -455,7 +466,7 @@ export default function UpdatePage() {
         ? new Date(formData.birthDate).toISOString().split("T")[0] // Doğum tarixini düzgün formatda al
         : "";
 
-      const imgPth = formData.imagePath; // Şəkilin yolunu al
+      const imgPth = formData.imagePath || imagePath; // Şəkilin yolunu al
 
       if (!imgPth) {
         throw new Error("Image path is missing"); // Şəkil yolu mövcud deyilsə, xəta ver
@@ -464,6 +475,9 @@ export default function UpdatePage() {
       console.log("Updating user...");
       console.log(imgPth);
       console.log(bday);
+      console.log(formData.skills.length);
+      console.log(selectedSkills.length);
+      console.log(selectedSkills);
 
       // Yenilənən məlumatları göndəririk
       const response = await fetch(
@@ -475,22 +489,23 @@ export default function UpdatePage() {
             Authorization: `Bearer ${token}`, // Token əlavə edilir
           },
           body: JSON.stringify({
-            userName: formData.userName,
+            userName: formData.userName || "" || currentUserName,
             password: formData.password,
-            emailAddress: formData.emailAddress,
-            skills: formData.skills,
-            country: formData.country,
+            emailAddress: formData.emailAddress || "" || currentUserEmail,
+            skills:
+              selectedSkills.length != 0 ? selectedSkills : currentUserSkills,
+            country: formData.country || "" || currentUserCountry,
             imagePath: imgPth, // Yenilənən şəkil yolu
-            about: formData.about,
-            birthDate: bday,
+            about: formData.about || "" || currentUserAbout,
+            birthDate: bday || "" || currentUserBirth,
           }),
         }
       );
 
       if (response.ok) {
-        console.log("User updated successfully");
+        alert("User updated successfully");
       } else {
-        console.log("Failed to update user");
+        alert("Failed to update user");
       }
     } catch (error) {
       setError(`Error updating user: ${error.message}`); // Yeniləmə zamanı baş verən xətaları göstər
@@ -525,6 +540,53 @@ export default function UpdatePage() {
     }
   }
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    console.log(currentUserSkills);
+  });
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(
+        `https://localhost:7086/api/applicant/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Token əlavə edilir
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      } else {
+        const data = await response.json();
+        console.log(data);
+        console.log(data.username);
+        console.log(data.email);
+        console.log(data.country);
+        console.log(data.about);
+
+        setCurrentUserName(data.username);
+        setCurrentUserEmail(data.email);
+        setCurrentUserCountry(data.country);
+        setCurrentUserAbout(data.about);
+        setCurrentUserSkills(data.skills);
+        setCurrentUserBirth(data.birthDate);
+      }
+    } catch (error) {
+      setError(error);
+      console.log(error);
+    }
+  };
+
+  const imageClickHandler = () => {
+    navigate("/profile");
+  };
   return (
     <div style={{ height: "100%" }}>
       <header style={styles.header}>
@@ -581,6 +643,7 @@ export default function UpdatePage() {
                 border: "1px solid transparent",
                 borderRadius: "50%",
               }}
+              onClick={imageClickHandler}
             />
           </div>
         </div>
@@ -614,7 +677,7 @@ export default function UpdatePage() {
                   height: "2em",
                 })
               }
-              placeholder="Enter your username"
+              placeholder={currentUserName}
             />
           </div>
           <div style={styles2.formGroup}>
@@ -637,12 +700,12 @@ export default function UpdatePage() {
                   backgroundColor: "white",
                   color: "black",
                   backgroundColor: "white  ",
-                  border: "1px solid black",
+                  border: "1px solid red",
                   cursor: "pointer",
                   height: "2em",
                 })
               }
-              placeholder="Enter your new password"
+              placeholder="Enter your old or new password"
             />
           </div>
           <div style={styles2.formGroup}>
@@ -670,7 +733,7 @@ export default function UpdatePage() {
                   height: "2em",
                 })
               }
-              placeholder="Enter your email"
+              placeholder={currentUserEmail}
             />
           </div>
           <div style={styles2.formGroup}>
@@ -695,7 +758,7 @@ export default function UpdatePage() {
                   height: "2em",
                 })
               }
-              placeholder="Tell us about yourself"
+              placeholder={currentUserAbout}
             />
           </div>
           <div style={styles2.formGroup}>
@@ -706,7 +769,7 @@ export default function UpdatePage() {
               Selected Skills:
             </label>
             {selectedSkills.length > 0 ? (
-              <ul style={{ color: "black" }}>
+              <ul style={{ color: "black", listStyleType: "none" }}>
                 {selectedSkills.map((skill, index) => (
                   <li key={index}>{skill}</li>
                 ))}
@@ -754,24 +817,6 @@ export default function UpdatePage() {
                 </div>
               ))}
             </div>
-            {/* <input
-              type="text"
-              id="skills"
-              name="skills"
-              value={formData.skills}
-              onChange={handleInputChange}
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-              placeholder="Enter your skills (comma separated)"
-            /> */}
           </div>
           <div style={styles2.formGroup}>
             <label
@@ -796,7 +841,7 @@ export default function UpdatePage() {
                 })
               }
             >
-              <option value="">Select your country</option>
+              <option value="">{currentUserCountry}</option>
               <option value="United States of America">
                 United States of America
               </option>

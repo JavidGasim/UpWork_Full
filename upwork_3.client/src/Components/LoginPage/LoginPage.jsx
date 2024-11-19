@@ -98,6 +98,7 @@ export default function LoginPage() {
     } catch (error) {
       setError(error.message); // Hata mesajını duruma ekle
       console.error("Login error:", error);
+      alert("Error: " + error.message);
     } finally {
       setLoading(false); // Yüklenme durumunu sona erdir
     }

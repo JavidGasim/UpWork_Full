@@ -21,7 +21,6 @@ function App() {
         <Route path="/home" element={<SignedHomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/edit" element={<UpdatePage />} />
-        {/* <Route path="/contact" element={<Contact />} /> */}
       </Routes>
     </Router>
   );

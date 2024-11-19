@@ -174,6 +174,7 @@ export default function ProfilePage() {
   const [birthdate, setBirthdate] = useState("");
   const [skills, setSkills] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [connections, setConnections] = useState();
   const [about, setAbout] = useState("");
   const navigate = useNavigate();
@@ -189,21 +190,6 @@ export default function ProfilePage() {
 
     // Giriş səhifəsinə yönləndirmək
     navigate("/login");
-  };
-
-  const handleEditPhoto = () => {
-    // Implement photo edit functionality
-    console.log("Edit photo clicked");
-  };
-
-  const handleEditAbout = () => {
-    // Implement about edit functionality
-    console.log("Edit about clicked");
-  };
-
-  const handleEditSkills = () => {
-    // Implement skills edit functionality
-    console.log("Edit skills clicked");
   };
 
   const buttonStyle = {
@@ -310,7 +296,7 @@ export default function ProfilePage() {
         .then((response) => response.json())
         .then((data) => {
           // data = response.json();
-          setApplications(data.Job || []);
+          setApplications(data.Applications || []);
           console.log(data);
         });
     });
@@ -638,6 +624,297 @@ export default function ProfilePage() {
       </div>
     );
   } else {
-    return <div style={{ height: "100vh" }}>qwertyuio</div>;
+    useEffect(() => {
+      fetch("https://localhost:7086/api/advertiser/" + userId, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          //   const data = response.json();
+
+          // Datanı state-lərə təyin etmək
+          console.log(userId);
+
+          setName(data.firstname);
+          setSurname(data.lastname);
+          setEmail(data.email);
+          setCountry(data.country);
+          setBirthdate(data.birthDate);
+          setSkills(data.skills || []); // Array olduğu üçün boş array olaraq təyin edirik
+          setConnections(data.connections); // Əgər connections bir rəqəmdirsə
+          setAbout(data.about); //
+
+          console.log(name);
+          console.log(surname);
+          console.log(email);
+          console.log(country);
+          console.log(birthdate);
+          console.log(skills);
+          console.log(connections);
+          console.log(about);
+
+          // console.log("Məlumatların alınması başarılı");
+        })
+        .catch((error) => console.log(error));
+    }, []);
+
+    useEffect(() => {
+      fetch("https://localhost:7086/api/Job/" + userId, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // data = response.json();
+          setJobs(data.Jobs || []);
+          console.log(data);
+        });
+    });
+    return (
+      <div style={{ height: "100vh" }}>
+        <div style={styles.jobSearchPage}>
+          <header style={styles.header}>
+            <div style={styles.logo}>Upwork</div>
+            <div style={styles.searchBar}>
+              <button style={styles.searchButton} onClick={homepageHandler}>
+                HOME
+              </button>
+              <div style={styles.userActions}>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "-5px 5px",
+                    fontSize: "16px",
+                    color: "#ffffff",
+                    backgroundColor: "#14a800",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s",
+                  }}
+                  // onMouseOver={(e) =>
+                  //   (e.currentTarget.style.backgroundColor = "#d32f2f")
+                  // }
+                  // onMouseOut={(e) =>
+                  //   (e.currentTarget.style.backgroundColor = "#f44336")
+                  // }
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      marginRight: "3px",
+                    }}
+                  >
+                    <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
+                    <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
+                  </svg>
+                  Logout
+                </button>
+                <img
+                  src={imagePath || defaultProfileImageUrl}
+                  alt="profile_image"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    objectFit: "cover",
+                    marginLeft: "10px",
+                    border: "1px solid transparent",
+                    borderRadius: "50%",
+                  }}
+                />
+              </div>
+            </div>
+          </header>
+        </div>
+        <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              marginBottom: "2rem",
+              justifyContent: "space-between",
+              gap: "1rem",
+            }}
+          >
+            <div style={{ position: "relative" }}>
+              <img
+                src={imagePath}
+                alt="Freelancer profile picture"
+                style={{
+                  width: "250px",
+                  height: "250px",
+                  borderRadius: "20px",
+                  objectFit: "fill",
+                }}
+              />
+            </div>
+            <div style={{ marginLeft: "1.5rem" }}>
+              <h1
+                style={{
+                  fontSize: "1.875rem",
+                  fontWeight: "bold",
+                  color: "#111827",
+                }}
+              >
+                {name} {surname}
+              </h1>
+              <h4
+                style={{
+                  fontSize: "1.25rem",
+                  color: "#4b5563",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {country}
+              </h4>
+            </div>
+            <button
+              style={
+                (buttonStyle,
+                {
+                  color: "black",
+                  backgroundColor: "white",
+                  marginLeft: "1.5rem",
+                })
+              }
+              onClick={handleUpdate}
+            >
+              <svg
+                style={editIconStyle}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+              Edit
+            </button>
+          </div>
+
+          <div>
+            <div
+              style={{
+                display: "flex",
+                borderBottom: "1px solid #e5e7eb",
+                marginBottom: "1rem",
+              }}
+            >
+              {["about", "my jobs"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    fontWeight: "500",
+                    color: activeTab === tab ? "#2563eb" : "#4b5563",
+                    borderBottom:
+                      activeTab === tab ? "2px solid #2563eb" : "none",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "#f3f4f6",
+                borderRadius: "0.5rem",
+                padding: "1.5rem",
+              }}
+            >
+              {activeTab === "about" && (
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                        color: "#111827",
+                      }}
+                    >
+                      About Me
+                    </h2>
+                  </div>
+                </div>
+              )}
+              {activeTab === "my jobs" && (
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                        color: "#111827",
+                      }}
+                    >
+                      My Jobs
+                    </h2>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    {jobs.map((job) => (
+                      <span
+                        key={job}
+                        style={{
+                          padding: "0.25rem 0.75rem",
+                          backgroundColor: "#e5e7eb",
+                          color: "#1f2937",
+                          borderRadius: "9999px",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        {job.jobId}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 }
