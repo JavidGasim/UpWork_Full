@@ -7,6 +7,7 @@ import RegisterPage from "./Components/RegisterPage/RegisterPage";
 import SignedHomePage from "./Components/SignedHomePage/SignedHomePage";
 import ProfilePage from "./Components/ProfilePage/ProfilePage";
 import UpdatePage from "./Components/UpdatePage/UpdatePage";
+import AddJobPage from "./Components/AddJobPage/AddJobPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/home" element={<SignedHomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/edit" element={<UpdatePage />} />
+        <Route path="/addjob" element={<AddJobPage />} />
       </Routes>
     </Router>
   );

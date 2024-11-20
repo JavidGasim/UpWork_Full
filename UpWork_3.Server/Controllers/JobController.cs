@@ -32,10 +32,11 @@ namespace UpWork.Controllers
         }
 
         [Authorize(Roles = "Applicant,Advertiser")]
-        [HttpGet("{tags}")]
-        public async Task<List<JobDTO>> Get(List<string> tags)
+        [HttpGet("{tag}")]
+        public async Task<List<JobDTO>> GetTag(string tags)
         {
-            var jobs = await _jobService.GetJobByTags(tags);
+            var tagArray = tags.Split(',');
+            var jobs = await _jobService.GetJobByTags(tagArray.ToList());
             var jobDTO = _mapper.Map<List<JobDTO>>(jobs);
 
             return jobDTO;
@@ -73,7 +74,7 @@ namespace UpWork.Controllers
             return BadRequest("Jobs are empty");
         }
 
-        [Authorize(Roles = "Advertiser")]
+        [Authorize]
         [HttpGet("isDoneJobs/{id}")]
         public async Task<IActionResult> GetIsDoneJobs(string id)
         {
@@ -107,7 +108,7 @@ namespace UpWork.Controllers
             return BadRequest("Jobs are empty");
         }
 
-        [Authorize(Roles = "Advertiser")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] JobDTO dto)
         {
@@ -116,7 +117,7 @@ namespace UpWork.Controllers
             return Ok(new { Message = "Job added successfully" });
         }
 
-        [Authorize(Roles = "Advertiser")]
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put(string id, [FromBody] JobDTO dto)
         {

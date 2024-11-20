@@ -102,6 +102,10 @@ const styles = {
     borderRadius: "4px",
     padding: "1rem",
     marginBottom: "1rem",
+    textAlign: "left",
+    overflowWrap: "break-word",
+    whiteSpace: "normal",
+    wordBreak: "break-word",
   },
   jobDescription: {
     margin: "0.5rem 0",
@@ -167,6 +171,7 @@ const styles = {
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("about");
+  const [activeTab2, setActiveTab2] = useState("my jobs");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState();
@@ -177,6 +182,15 @@ export default function ProfilePage() {
   const [jobs, setJobs] = useState([]);
   const [connections, setConnections] = useState();
   const [about, setAbout] = useState("");
+
+  const [jobAdvertiser, setJobAdvertiser] = useState("");
+  const [jobContent, setJobContent] = useState("");
+  const [jobRequiredConnections, setJobRequiredConnections] = useState();
+  const [jobExLevel, setJobExLevel] = useState([]);
+  const [jobTags, setTags] = useState([]);
+  const [jobPrice, setPrice] = useState("");
+  const [jobIsDone, setIsDone] = useState(false);
+
   const navigate = useNavigate();
 
   const handleUpdate = () => {
@@ -662,23 +676,55 @@ export default function ProfilePage() {
         .catch((error) => console.log(error));
     }, []);
 
+    // useEffect(() => {
+    //   fetch(`https://localhost:7086/api/advertiserJob/${userId}`, {
+    //     method: "GET",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: "Bearer " + localStorage.getItem("token"),
+    //     },
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       setJobs(data.Jobs || []);
+    //       // setJobAdvertiser(data.Advertiser);
+    //       // setJobContent(data.Content);
+    //       // setJobRequiredConnections(data.RequiredConnections);
+    //       // setJobExLevel(data.ExperienceLevel || []);
+    //       // setTags(data.Tags || []);
+    //       // setPrice(data.Price);
+    //       // setIsDone(data.IsDone);
+
+    //       console.log(data);
+    //     });
+    // });
     useEffect(() => {
-      fetch("https://localhost:7086/api/Job/" + userId, {
+      fetch(`https://localhost:7086/api/job/advertiserJob/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json(); // Yalnız bir dəfə çağırılır
+        })
         .then((data) => {
-          // data = response.json();
-          setJobs(data.Jobs || []);
+          if (data) {
+            setJobs(data.jobs);
+          } else {
+            setJobs([]);
+          }
           console.log(data);
-        });
-    });
+        })
+        .catch((error) => console.error("Xəta baş verdi:", error));
+    }, [userId]);
+
     return (
-      <div style={{ height: "100vh" }}>
+      <div>
         <div style={styles.jobSearchPage}>
           <header style={styles.header}>
             <div style={styles.logo}>Upwork</div>
@@ -818,10 +864,10 @@ export default function ProfilePage() {
                 marginBottom: "1rem",
               }}
             >
-              {["about", "my jobs"].map((tab) => (
+              {["my jobs"].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => setActiveTab2(tab)}
                   style={{
                     padding: "0.5rem 1rem",
                     fontWeight: "500",
@@ -845,29 +891,7 @@ export default function ProfilePage() {
                 padding: "1.5rem",
               }}
             >
-              {activeTab === "about" && (
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "1rem",
-                    }}
-                  >
-                    <h2
-                      style={{
-                        fontSize: "1.5rem",
-                        fontWeight: "bold",
-                        color: "#111827",
-                      }}
-                    >
-                      About Me
-                    </h2>
-                  </div>
-                </div>
-              )}
-              {activeTab === "my jobs" && (
+              {activeTab2 === "my jobs" && (
                 <div>
                   <div
                     style={{
@@ -894,20 +918,43 @@ export default function ProfilePage() {
                       gap: "0.5rem",
                     }}
                   >
-                    {jobs.map((job) => (
-                      <span
-                        key={job}
-                        style={{
-                          padding: "0.25rem 0.75rem",
-                          backgroundColor: "#e5e7eb",
-                          color: "#1f2937",
-                          borderRadius: "9999px",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        {job.jobId}
-                      </span>
-                    ))}
+                    {jobs &&
+                      jobs.map((job) => (
+                        <div key={job.id} style={styles.jobCard}>
+                          <h2 style={{ color: "black" }}>
+                            Job's title:
+                            <span
+                              style={{ fontWeight: "normal", color: "black" }}
+                            >
+                              {" "}
+                              {job.jobTitle}
+                            </span>
+                          </h2>
+                          <p style={styles.jobDescription}>{job.content}</p>
+                          <div style={styles.jobDetails}>
+                            <span style={(styles.budget, { color: "black" })}>
+                              Price: {job.price}$
+                            </span>
+                            {/* <span style={styles.proposals}>{job.tags} proposals</span> */}
+                          </div>
+                          <div style={{ marginBottom: "10px" }}>
+                            <span style={{ color: "#222", fontWeight: "bold" }}>
+                              Connections: {job.requiredConnections}
+                            </span>
+                          </div>
+                          <div style={styles.skills}>
+                            {job.tags.map((skill) => (
+                              <span
+                                key={skill}
+                                style={{ ...styles.skillTag, color: "black" }}
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                          {/* <button style={styles.applyButton}>Apply Now</button> */}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}

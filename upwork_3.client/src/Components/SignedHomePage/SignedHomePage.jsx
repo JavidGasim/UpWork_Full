@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const styles = {
   jobSearchPage: {
@@ -103,6 +104,10 @@ const styles = {
     borderRadius: "4px",
     padding: "1rem",
     marginBottom: "1rem",
+    textAlign: "left",
+    overflowWrap: "break-word",
+    whiteSpace: "normal",
+    wordBreak: "break-word",
   },
   jobDescription: {
     margin: "0.5rem 0",
@@ -266,6 +271,14 @@ export default function SignedHomePage() {
 
   const navigate = useNavigate();
 
+  const myJobsHandler = () => {
+    navigate("/profile");
+  };
+
+  const addJobHandler = () => {
+    navigate("/addjob");
+  };
+
   const handleLogout = () => {
     // Sessiyanı təmizləmək
     localStorage.removeItem("token"); // Tokeni silmək
@@ -308,13 +321,19 @@ export default function SignedHomePage() {
 
   const handleSearch = async () => {
     try {
+      console.log(selectedTags);
+      const queryString = selectedTags
+        .map((tag) => `tags=${encodeURIComponent(tag)}`)
+        .join(",");
       const response = await fetch(
-        "https://localhost:7086/api/job/{searchTerm}",
+        `https://localhost:7086/api/job/GetTag/${selectedTags.join(",")}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Token əlavə edilir
           },
+          // body: JSON.stringify(selectedTags),
         }
       );
 
@@ -323,12 +342,39 @@ export default function SignedHomePage() {
       }
 
       const data = await response.json();
+      // console.log(await response.json()); // Axtarış nəticələrini burada idarə edin
+      console.log(jobs);
+      console.log(response);
       setJobs(data);
+      console.log(jobs);
       console.log("Search Results:", data); // Axtarış nəticələrini burada idarə edin
     } catch (error) {
       console.error("Search failed:", error);
     }
   };
+
+  // const handleSearch = async () => {
+  //   const apiUrl = "https://localhost:7086/api/job"; // API endpoint
+
+  //   try {
+  //     // Query parametrlər
+  //     const queryParams = selectedTags.join(","); // tags array-ni vergüllə birləşdiririk
+  //     const response = await axios.get(`${apiUrl}/${queryParams}`, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`, // Əgər JWT token lazımdırsa əlavə edin
+  //       },
+  //     });
+
+  //     console.log(response);
+  //     console.log("Filtered jobs:", response.data);
+  //     setJobs(response.data);
+  //     console.log(jobs); // Axtarış nəticələrini burada idarə edin
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching jobs:", error);
+  //   }
+  // };
 
   if (token) {
     try {
@@ -353,7 +399,7 @@ export default function SignedHomePage() {
             method: "GET", // HTTP metodunu belirt
             headers: {
               "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
 
@@ -385,6 +431,7 @@ export default function SignedHomePage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
+              // onClick={handleSearch2}
             />
             <button style={styles.searchButton}>Search</button>
             <div style={styles.userActions}>
@@ -511,25 +558,36 @@ export default function SignedHomePage() {
 
           <main style={styles.jobListings}>
             <h2>Jobs you might like</h2>
-
-            {jobs.map((job) => (
-              <div key={job.id} style={styles.jobCard}>
-                <h3>{job.content}</h3>
-                <p style={styles.jobDescription}>{job.description}</p>
-                <div style={styles.jobDetails}>
-                  <span style={styles.budget}>{job.price}</span>
-                  <span style={styles.proposals}>{job.tags} proposals</span>
-                </div>
-                <div style={styles.skills}>
-                  {job.skills.map((skill) => (
-                    <span key={skill} style={styles.skillTag}>
-                      {skill}
+            {jobs &&
+              jobs.map((job) => (
+                <div key={job.id} style={styles.jobCard}>
+                  <h2>
+                    Job's title:
+                    <span style={{ fontWeight: "normal" }}>
+                      {" "}
+                      {job.jobTitle}
                     </span>
-                  ))}
+                  </h2>
+                  <p style={styles.jobDescription}>{job.content}</p>
+                  <div style={styles.jobDetails}>
+                    <span style={styles.budget}>Price: {job.price}$</span>
+                    {/* <span style={styles.proposals}>{job.tags} proposals</span> */}
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <span style={{ color: "#222", fontWeight: "bold" }}>
+                      Connections: {job.requiredConnections}
+                    </span>
+                  </div>
+                  <div style={styles.skills}>
+                    {job.tags.map((skill) => (
+                      <span key={skill} style={styles.skillTag}>
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                  <button style={styles.applyButton}>Apply Now</button>
                 </div>
-                <button style={styles.applyButton}>Apply Now</button>
-              </div>
-            ))}
+              ))}
           </main>
         </div>
       </div>
@@ -542,7 +600,7 @@ export default function SignedHomePage() {
             method: "GET", // HTTP metodunu belirt
             headers: {
               "Content-Type": "application/json", // JSON içeriği gönderdiğimizi belirt
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
 
@@ -553,6 +611,7 @@ export default function SignedHomePage() {
             throw new Error("Network response was not ok");
           }
           const data = await response.json();
+          console.log(data || []);
           setJobs(data);
         } catch (err) {
           setError(err.message);
@@ -562,14 +621,18 @@ export default function SignedHomePage() {
       };
 
       fetchApplicants();
-    }, []);
+    });
     return (
       <div style={styles.jobSearchPage}>
         <header style={styles.header}>
           <div style={styles.logo}>Upwork</div>
           <div style={styles.searchBar}>
-            <button style={styles.searchInput}>My Jobs</button>
-            <button style={styles.searchInput}>Add Job</button>
+            <button style={styles.searchInput} onClick={myJobsHandler}>
+              My Jobs
+            </button>
+            <button style={styles.searchInput} onClick={addJobHandler}>
+              Add Job
+            </button>
             <div style={styles.userActions}>
               <button
                 onClick={handleLogout}
@@ -689,25 +752,36 @@ export default function SignedHomePage() {
 
           <main style={styles.jobListings}>
             <h2>Jobs you might like</h2>
-
-            {jobs.map((job) => (
-              <div key={job.id} style={styles.jobCard}>
-                <h3>{job.content}</h3>
-                <p style={styles.jobDescription}>{job.description}</p>
-                <div style={styles.jobDetails}>
-                  <span style={styles.budget}>{job.price}</span>
-                  <span style={styles.proposals}>{job.tags} proposals</span>
-                </div>
-                <div style={styles.skills}>
-                  {job.skills.map((skill) => (
-                    <span key={skill} style={styles.skillTag}>
-                      {skill}
+            {jobs &&
+              jobs.map((job) => (
+                <div key={job.id} style={styles.jobCard}>
+                  <h2>
+                    Job's title:
+                    <span style={{ fontWeight: "normal" }}>
+                      {" "}
+                      {job.jobTitle}
                     </span>
-                  ))}
+                  </h2>
+                  <p style={styles.jobDescription}>{job.content}</p>
+                  <div style={styles.jobDetails}>
+                    <span style={styles.budget}>Price: {job.price}$</span>
+                    {/* <span style={styles.proposals}>{job.tags} proposals</span> */}
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <span style={{ color: "#222", fontWeight: "bold" }}>
+                      Connections: {job.requiredConnections}
+                    </span>
+                  </div>
+                  <div style={styles.skills}>
+                    {job.tags.map((skill) => (
+                      <span key={skill} style={styles.skillTag}>
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                  {/* <button style={styles.applyButton}>Apply Now</button> */}
                 </div>
-                <button style={styles.applyButton}>Apply Now</button>
-              </div>
-            ))}
+              ))}
           </main>
         </div>
       </div>

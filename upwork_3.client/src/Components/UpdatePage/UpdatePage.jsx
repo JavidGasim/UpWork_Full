@@ -446,8 +446,18 @@ export default function UpdatePage() {
         formData.imagePath = data.imageUrl.toString(); // imagePath təyin edirik
 
         // `formData.userName` mövcud olduqda istifadəçi adı yoxlanır
-        if (formData.userName && formData.userName.trim() !== "") {
+        if (
+          formData.userName &&
+          formData.userName.trim() !== "" &&
+          userRole == "Applicant"
+        ) {
           await fetchUserName();
+        } else if (
+          formData.userName &&
+          formData.userName.trim() !== "" &&
+          userRole == "Advertiser"
+        ) {
+          await fetchUserAd();
         }
       }
 
@@ -515,6 +525,55 @@ export default function UpdatePage() {
     }
   };
 
+  const fetchUpdateAd = async () => {
+    try {
+      const bday = formData.birthDate
+        ? new Date(formData.birthDate).toISOString().split("T")[0] // Doğum tarixini düzgün formatda al
+        : "";
+
+      const imgPth = formData.imagePath || imagePath; // Şəkilin yolunu al
+
+      if (!imgPth) {
+        throw new Error("Image path is missing"); // Şəkil yolu mövcud deyilsə, xəta ver
+      }
+
+      console.log("Updating user...");
+      console.log(imgPth);
+      console.log(bday);
+
+      // Yenilənən məlumatları göndəririk
+      const response = await fetch(
+        `https://localhost:7086/api/advertiser/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Token əlavə edilir
+          },
+          body: JSON.stringify({
+            userName: formData.userName || "" || currentUserName,
+            password: formData.password,
+            emailAddress: formData.emailAddress || "" || currentUserEmail,
+            country: formData.country || "" || currentUserCountry,
+            imagePath: imgPth, // Yenilənən şəkil yolu
+            birthDate: bday || "" || currentUserBirth,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        alert("User updated successfully");
+      } else {
+        alert("Failed to update user");
+      }
+    } catch (error) {
+      setError(`Error updating user: ${error.message}`); // Yeniləmə zamanı baş verən xətaları göstər
+      console.error(error);
+    } finally {
+      setLoading(false); // Yükləmə tamamlandıqda loading vəziyyəti sıfırlanır
+    }
+  };
+
   let userRole = null;
   let userId = null;
 
@@ -541,11 +600,15 @@ export default function UpdatePage() {
   }
 
   useEffect(() => {
-    fetchUser();
+    if (userRole == "Applicant") {
+      fetchUser();
+    } else {
+      fetchUserAd();
+    }
   }, []);
 
   useEffect(() => {
-    console.log(currentUserSkills);
+    console.log(currentUserEmail);
   });
 
   const fetchUser = async () => {
@@ -584,374 +647,698 @@ export default function UpdatePage() {
     }
   };
 
+  const fetchUserAd = async () => {
+    try {
+      const response = await fetch(
+        `https://localhost:7086/api/advertiser/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Token əlavə edilir
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      } else {
+        const data = await response.json();
+        console.log(data);
+        console.log(data.username);
+        console.log(data.email);
+        console.log(data.country);
+        console.log(data.about);
+
+        setCurrentUserName(data.username);
+        setCurrentUserEmail(data.email);
+        setCurrentUserCountry(data.country);
+        setCurrentUserAbout(data.about);
+        setCurrentUserBirth(data.birthDate);
+      }
+    } catch (error) {
+      setError(error);
+      console.log(error);
+    }
+  };
+
   const imageClickHandler = () => {
     navigate("/profile");
   };
-  return (
-    <div style={{ height: "100%" }}>
-      <header style={styles.header}>
-        <div style={styles.logo}>Upwork</div>
-        <div style={styles.searchBar}>
-          <button style={styles.searchButton} onClick={homepageHandler}>
-            HOME
-          </button>
-          <div style={styles.userActions}>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "-5px 5px",
-                fontSize: "16px",
-                color: "#ffffff",
-                backgroundColor: "#14a800",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                transition: "background-color 0.3s",
-              }}
-              // onMouseOver={(e) =>
-              //   (e.currentTarget.style.backgroundColor = "#d32f2f")
-              // }
-              // onMouseOut={(e) =>
-              //   (e.currentTarget.style.backgroundColor = "#f44336")
-              // }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                style={{
-                  width: "16px",
-                  height: "16px",
-                  marginRight: "3px",
-                }}
-              >
-                <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
-                <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
-              </svg>
-              Logout
+
+  if (userRole == "Applicant") {
+    return (
+      <div style={{ height: "100%" }}>
+        <header style={styles.header}>
+          <div style={styles.logo}>Upwork</div>
+          <div style={styles.searchBar}>
+            <button style={styles.searchButton} onClick={homepageHandler}>
+              HOME
             </button>
-            <img
-              src={imagePath || defaultProfileImageUrl}
-              alt="profile_image"
-              style={{
-                width: "40px",
-                height: "40px",
-                objectFit: "cover",
-                marginLeft: "10px",
-                border: "1px solid transparent",
-                borderRadius: "50%",
-              }}
-              onClick={imageClickHandler}
-            />
-          </div>
-        </div>
-      </header>
-      <main style={styles2.main}>
-        <h1 style={{ color: "#14a800" }}>Edit Profile</h1>
-        <form style={styles2.form} onSubmit={handleSubmit}>
-          {" "}
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="userName"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              id="userName"
-              name="userName"
-              value={formData.userName}
-              onChange={handleInputChange}
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  color: "black",
-                  backgroundColor: "white  ",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-              placeholder={currentUserName}
-            />
-          </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="password"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  color: "black",
-                  backgroundColor: "white  ",
-                  border: "1px solid red",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-              placeholder="Enter your old or new password"
-            />
-          </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="emailAddress"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="emailAddress"
-              name="emailAddress"
-              value={formData.emailAddress}
-              onChange={handleInputChange}
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  color: "black",
-                  backgroundColor: "white  ",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-              placeholder={currentUserEmail}
-            />
-          </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="about"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              About
-            </label>
-            <textarea
-              id="about"
-              name="about"
-              value={formData.about}
-              onChange={handleInputChange}
-              style={
-                (styles2.textarea,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-              placeholder={currentUserAbout}
-            />
-          </div>
-          <div style={styles2.formGroup}>
-            {/* <div style={{ marginTop: "20px" }}> */}
-            <label
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Selected Skills:
-            </label>
-            {selectedSkills.length > 0 ? (
-              <ul style={{ color: "black", listStyleType: "none" }}>
-                {selectedSkills.map((skill, index) => (
-                  <li key={index}>{skill}</li>
-                ))}
-              </ul>
-            ) : (
-              <p
+            <div style={styles.userActions}>
+              <button
+                onClick={handleLogout}
                 style={{
-                  color: "black",
-                  textAlign: "left",
-                  marginLeft: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "-5px 5px",
+                  fontSize: "16px",
+                  color: "#ffffff",
+                  backgroundColor: "#14a800",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s",
                 }}
+                // onMouseOver={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#d32f2f")
+                // }
+                // onMouseOut={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#f44336")
+                // }
               >
-                No skills selected.
-              </p>
-            )}
-            {/* </div> */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px", // space between tags
-                border: "1px solid #ccc",
-                padding: "10px",
-                width: "100%",
-                borderRadius: "5px",
-              }}
-            >
-              {skills.map((skill, index) => (
-                <div
-                  key={index}
-                  onClick={() => toggleSkill(skill)}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                   style={{
-                    cursor: "pointer",
-                    padding: "5px",
-                    margin: "5px 0",
-                    backgroundColor: selectedSkills.includes(skill)
-                      ? "#4caf50"
-                      : "#f0f0f0",
-                    color: selectedSkills.includes(skill) ? "#fff" : "#000",
-                    borderRadius: "3px",
-                    transition: "background-color 0.3s ease",
+                    width: "16px",
+                    height: "16px",
+                    marginRight: "3px",
                   }}
                 >
-                  {skill}
-                </div>
-              ))}
+                  <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
+                  <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
+                </svg>
+                Logout
+              </button>
+              <img
+                src={imagePath || defaultProfileImageUrl}
+                alt="profile_image"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  objectFit: "cover",
+                  marginLeft: "10px",
+                  border: "1px solid transparent",
+                  borderRadius: "50%",
+                }}
+                onClick={imageClickHandler}
+              />
             </div>
           </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="country"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Country
-            </label>
-            <select
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              style={
-                (styles2.select,
-                {
-                  color: "black",
-                  backgroundColor: "white  ",
-                  border: "1px solid black",
+        </header>
+        <main style={styles2.main}>
+          <h1 style={{ color: "#14a800" }}>Edit Profile</h1>
+          <form style={styles2.form} onSubmit={handleSubmit}>
+            {" "}
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="userName"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="userName"
+                name="userName"
+                value={formData.userName}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder={currentUserName}
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="password"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid red",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder="Enter your old or new password"
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="emailAddress"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="emailAddress"
+                name="emailAddress"
+                value={formData.emailAddress}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder={currentUserEmail}
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="about"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                About
+              </label>
+              <textarea
+                id="about"
+                name="about"
+                value={formData.about}
+                onChange={handleInputChange}
+                style={
+                  (styles2.textarea,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder={currentUserAbout}
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              {/* <div style={{ marginTop: "20px" }}> */}
+              <label
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Selected Skills:
+              </label>
+              {selectedSkills.length > 0 ? (
+                <ul style={{ color: "black", listStyleType: "none" }}>
+                  {selectedSkills.map((skill, index) => (
+                    <li key={index}>{skill}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p
+                  style={{
+                    color: "black",
+                    textAlign: "left",
+                    marginLeft: "20px",
+                  }}
+                >
+                  No skills selected.
+                </p>
+              )}
+              {/* </div> */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px", // space between tags
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  width: "100%",
+                  borderRadius: "5px",
+                }}
+              >
+                {skills.map((skill, index) => (
+                  <div
+                    key={index}
+                    onClick={() => toggleSkill(skill)}
+                    style={{
+                      cursor: "pointer",
+                      padding: "5px",
+                      margin: "5px 0",
+                      backgroundColor: selectedSkills.includes(skill)
+                        ? "#4caf50"
+                        : "#f0f0f0",
+                      color: selectedSkills.includes(skill) ? "#fff" : "#000",
+                      borderRadius: "3px",
+                      transition: "background-color 0.3s ease",
+                    }}
+                  >
+                    {skill}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="country"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Country
+              </label>
+              <select
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                style={
+                  (styles2.select,
+                  {
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+              >
+                <option value="">{currentUserCountry}</option>
+                <option value="United States of America">
+                  United States of America
+                </option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Germany">Germany</option>
+                <option value="France">France</option>
+                <option value="Italy">Italy</option>
+                <option value="Japan">Japan</option>
+                <option value="China">China</option>
+                <option value="India">India</option>
+                <option value="Brazil">Brazil</option>
+                <option value="Russia">Russia</option>
+                <option value="Australia">Australia</option>
+                <option value="Mexico">Mexico</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Spain">Spain</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Sweden">Sweden</option>
+                <option value="Norway">Norway</option>
+                <option value="Denmark">Denmark</option>
+                <option value="Finland">Finland</option>
+                <option value="Switzerland">Switzerland</option>
+                <option value="Belgium">Belgium</option>
+                <option value="Ireland">Ireland</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Austria">Austria</option>
+                <option value="Portugal">Portugal</option>
+                <option value="Kazakhstan">Kazakhstan</option>
+                <option value="Uzbekistan">Uzbekistan</option>
+                <option value="Turkey">Turkey</option>
+                <option value="Azerbaijan">Azerbaijan</option>
+                <option value="Iran">Iran</option>
+                <option value="Chile">Chile</option>
+                <option value="Philippines">Philippines</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Malaysia">Malaysia</option>
+                <option value="Thailand">Thailand</option>
+                <option value="Vietnam">Vietnam</option>
+                <option value="Egypt">Egypt</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Cambodia">Cambodia</option>
+                <option value="Bulgaria">Bulgaria</option>
+                <option value="Croatia">Croatia</option>
+                <option value="Lithuania">Lithuania</option>
+                <option value="Latvia">Latvia</option>
+                <option value="Iceland">Iceland</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="birthdate"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Birthdate
+              </label>
+              <input
+                type="date"
+                id="birthDate"
+                name="birthDate"
+                value={formData.birthDate}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="profileImage"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Profile Image
+              </label>
+              <input
+                type="file"
+                id="profileImage"
+                name="profileImage"
+                accept="image/*"
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    //   borderColor: "black",
+                    //   borderRadius: "4px",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "1.5em",
+                  })
+                }
+                onChange={(e) => handleFileChange(e)}
+              />
+            </div>
+            <button type="submit" style={styles2.button}>
+              Save Changes
+            </button>
+          </form>
+        </main>
+      </div>
+    );
+  } else {
+    return (
+      <div style={{ height: "100%" }}>
+        <header style={styles.header}>
+          <div style={styles.logo}>Upwork</div>
+          <div style={styles.searchBar}>
+            <button style={styles.searchButton} onClick={homepageHandler}>
+              HOME
+            </button>
+            <div style={styles.userActions}>
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "-5px 5px",
+                  fontSize: "16px",
+                  color: "#ffffff",
+                  backgroundColor: "#14a800",
+                  border: "none",
+                  borderRadius: "4px",
                   cursor: "pointer",
-                  height: "2em",
-                })
-              }
-            >
-              <option value="">{currentUserCountry}</option>
-              <option value="United States of America">
-                United States of America
-              </option>
-              <option value="Canada">Canada</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Germany">Germany</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Japan">Japan</option>
-              <option value="China">China</option>
-              <option value="India">India</option>
-              <option value="Brazil">Brazil</option>
-              <option value="Russia">Russia</option>
-              <option value="Australia">Australia</option>
-              <option value="Mexico">Mexico</option>
-              <option value="South Africa">South Africa</option>
-              <option value="Spain">Spain</option>
-              <option value="South Korea">South Korea</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Norway">Norway</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Finland">Finland</option>
-              <option value="Switzerland">Switzerland</option>
-              <option value="Belgium">Belgium</option>
-              <option value="Ireland">Ireland</option>
-              <option value="Singapore">Singapore</option>
-              <option value="Austria">Austria</option>
-              <option value="Portugal">Portugal</option>
-              <option value="Kazakhstan">Kazakhstan</option>
-              <option value="Uzbekistan">Uzbekistan</option>
-              <option value="Turkey">Turkey</option>
-              <option value="Azerbaijan">Azerbaijan</option>
-              <option value="Iran">Iran</option>
-              <option value="Chile">Chile</option>
-              <option value="Philippines">Philippines</option>
-              <option value="Argentina">Argentina</option>
-              <option value="Colombia">Colombia</option>
-              <option value="Malaysia">Malaysia</option>
-              <option value="Thailand">Thailand</option>
-              <option value="Vietnam">Vietnam</option>
-              <option value="Egypt">Egypt</option>
-              <option value="Saudi Arabia">Saudi Arabia</option>
-              <option value="Nigeria">Nigeria</option>
-              <option value="Cambodia">Cambodia</option>
-              <option value="Bulgaria">Bulgaria</option>
-              <option value="Croatia">Croatia</option>
-              <option value="Lithuania">Lithuania</option>
-              <option value="Latvia">Latvia</option>
-              <option value="Iceland">Iceland</option>
-              <option value="Georgia">Georgia</option>
-            </select>
+                  transition: "background-color 0.3s",
+                }}
+                // onMouseOver={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#d32f2f")
+                // }
+                // onMouseOut={(e) =>
+                //   (e.currentTarget.style.backgroundColor = "#f44336")
+                // }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    marginRight: "3px",
+                  }}
+                >
+                  <path d="M16 13v-2H7V8l-5 4 5 4v-3z" />
+                  <path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z" />
+                </svg>
+                Logout
+              </button>
+              <img
+                src={imagePath || defaultProfileImageUrl}
+                alt="profile_image"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  objectFit: "cover",
+                  marginLeft: "10px",
+                  border: "1px solid transparent",
+                  borderRadius: "50%",
+                }}
+                onClick={imageClickHandler}
+              />
+            </div>
           </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="birthdate"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Birthdate
-            </label>
-            <input
-              type="date"
-              id="birthDate"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleInputChange}
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white  ",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "2em",
-                })
-              }
-            />
-          </div>
-          <div style={styles2.formGroup}>
-            <label
-              htmlFor="profileImage"
-              style={(styles2.label, { color: "black", textAlign: "left" })}
-            >
-              Profile Image
-            </label>
-            <input
-              type="file"
-              id="profileImage"
-              name="profileImage"
-              accept="image/*"
-              style={
-                (styles2.input,
-                {
-                  color: "black",
-                  backgroundColor: "white",
-                  //   borderColor: "black",
-                  //   borderRadius: "4px",
-                  border: "1px solid black",
-                  cursor: "pointer",
-                  height: "1.5em",
-                })
-              }
-              onChange={(e) => handleFileChange(e)}
-            />
-          </div>
-          <button type="submit" style={styles2.button}>
-            Save Changes
-          </button>
-        </form>
-      </main>
-    </div>
-  );
+        </header>
+        <main style={styles2.main}>
+          <h1 style={{ color: "#14a800" }}>Edit Profile</h1>
+          <form style={styles2.form} onSubmit={handleSubmit}>
+            {" "}
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="userName"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="userName"
+                name="userName"
+                value={formData.userName}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder={currentUserName}
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="password"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid red",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder="Enter your old or new password"
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="emailAddress"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="emailAddress"
+                name="emailAddress"
+                value={formData.emailAddress}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+                placeholder={currentUserEmail}
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="country"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Country
+              </label>
+              <select
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                style={
+                  (styles2.select,
+                  {
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+              >
+                <option value="">{currentUserCountry}</option>
+                <option value="United States of America">
+                  United States of America
+                </option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Germany">Germany</option>
+                <option value="France">France</option>
+                <option value="Italy">Italy</option>
+                <option value="Japan">Japan</option>
+                <option value="China">China</option>
+                <option value="India">India</option>
+                <option value="Brazil">Brazil</option>
+                <option value="Russia">Russia</option>
+                <option value="Australia">Australia</option>
+                <option value="Mexico">Mexico</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Spain">Spain</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Sweden">Sweden</option>
+                <option value="Norway">Norway</option>
+                <option value="Denmark">Denmark</option>
+                <option value="Finland">Finland</option>
+                <option value="Switzerland">Switzerland</option>
+                <option value="Belgium">Belgium</option>
+                <option value="Ireland">Ireland</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Austria">Austria</option>
+                <option value="Portugal">Portugal</option>
+                <option value="Kazakhstan">Kazakhstan</option>
+                <option value="Uzbekistan">Uzbekistan</option>
+                <option value="Turkey">Turkey</option>
+                <option value="Azerbaijan">Azerbaijan</option>
+                <option value="Iran">Iran</option>
+                <option value="Chile">Chile</option>
+                <option value="Philippines">Philippines</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Malaysia">Malaysia</option>
+                <option value="Thailand">Thailand</option>
+                <option value="Vietnam">Vietnam</option>
+                <option value="Egypt">Egypt</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Cambodia">Cambodia</option>
+                <option value="Bulgaria">Bulgaria</option>
+                <option value="Croatia">Croatia</option>
+                <option value="Lithuania">Lithuania</option>
+                <option value="Latvia">Latvia</option>
+                <option value="Iceland">Iceland</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="birthdate"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Birthdate
+              </label>
+              <input
+                type="date"
+                id="birthDate"
+                name="birthDate"
+                value={formData.birthDate}
+                onChange={handleInputChange}
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white  ",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "2em",
+                  })
+                }
+              />
+            </div>
+            <div style={styles2.formGroup}>
+              <label
+                htmlFor="profileImage"
+                style={(styles2.label, { color: "black", textAlign: "left" })}
+              >
+                Profile Image
+              </label>
+              <input
+                type="file"
+                id="profileImage"
+                name="profileImage"
+                accept="image/*"
+                style={
+                  (styles2.input,
+                  {
+                    color: "black",
+                    backgroundColor: "white",
+                    //   borderColor: "black",
+                    //   borderRadius: "4px",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                    height: "1.5em",
+                  })
+                }
+                onChange={(e) => handleFileChange(e)}
+              />
+            </div>
+            <button type="submit" style={styles2.button}>
+              Save Changes
+            </button>
+          </form>
+        </main>
+      </div>
+    );
+  }
 }
